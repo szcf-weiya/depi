@@ -1,15 +1,29 @@
 # Instructions
 
-## install Rcpp and RcppGSL packages
+## install Rcpp packages
 
 ```
 install.packages('Rcpp')
-install.packages('RcppGSL')
 ```
 
 ## install gsl
 
 [https://www.gnu.org/software/gsl/](https://www.gnu.org/software/gsl/)
+
+### ubuntu
+
+
+```
+cd gsl-****
+./configure
+make
+make install
+```
+
+### windows 
+todo
+
+
 
 ## usage
 
