@@ -44,7 +44,8 @@ void readData(char* FILE, gsl_matrix *m, int row, int col, vector<string> &rowna
   // the first line
   getline(input, line);
   stringstream ss(line);
-  ss >> tmp; // null
+  // ss >> tmp; // null no need!!
+  //  cout << tmp << endl;
   for (size_t i = 0; i < col; i++)
     {
       ss >> tmp;
@@ -84,6 +85,8 @@ int main()
   vector<string> G_colname;
   vector<string> G_rowname;
   readData(FILE, G, MAX_ROW, MAX_COL, G_rowname, G_colname);
+  cout << G_colname[0] << endl
+       << G_colname[1] << endl;
   //  ifstream input3("cov.txt");
   char FILE3[] = "cov.txt";
   gsl_matrix *coveriate = gsl_matrix_alloc(MAX_ROW, COV_COL);

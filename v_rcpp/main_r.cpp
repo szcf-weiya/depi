@@ -41,7 +41,7 @@ void readData(string FILE, gsl_matrix *m, int row, int col, vector<string> &rown
   // the first line
   getline(input, line);
   stringstream ss(line);
-  ss >> tmp; // null
+  //ss >> tmp; // null no need!!!
   for (size_t i = 0; i < col; i++)
     {
       ss >> tmp;
