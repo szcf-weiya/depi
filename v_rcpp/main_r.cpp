@@ -1,3 +1,5 @@
+// [[Rcpp::depends(RcppGSL)]]
+#include <RcppGSL.h>
 #include<iostream>
 #include<iomanip>
 #include<fstream>
