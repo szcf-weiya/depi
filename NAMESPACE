@@ -1,4 +1,0 @@
-exportPattern("^[[:alpha:]]+")
-import(RcppGSL)
-importFrom(Rcpp, evalCpp)
-useDynLib(depi)
