@@ -141,7 +141,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV, int
   //# pragma omp for schedule(dynamic) // relatively slow
   gsl_matrix_set_col(X, 0, x0);
   gsl_vector *x1 = gsl_vector_alloc(MAX_ROW);
-  for (int i = 0; i < MAX_COL/100; i++)
+  for (int i = 0; i < MAX_COL; i++)
   {
 # pragma omp sections
 {
