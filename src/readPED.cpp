@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 
 #include <gsl/gsl_matrix.h>
 using namespace std;
@@ -12,7 +13,7 @@ void readPED(string FILE, vector<vector<double> > &mv)
 {
   ifstream input(FILE.c_str());
   string line;
-  string tmp;
+  string tmp, tmp1, tmp2;
   stringstream ss;
   double val;
   //vector<vector<double> > mv;
@@ -30,11 +31,18 @@ void readPED(string FILE, vector<vector<double> > &mv)
     for (size_t i = 0; i < 6; i++)
       ss >> tmp;
     while (!ss.eof()) {
-      ss >> tmp;
+      ss >> tmp1 >> tmp2;
       // must judge eof status!!!
       if(ss.eof())
         break;
-      val = strtod(tmp.c_str(), NULL);
+      tmp = tmp1 + tmp2;
+      if (strcmp(tmp.c_str(), "11"))
+        val = 0;
+      else if (strcmp(tmp.c_str(), "12"))
+        val = 1;
+      else if (strcmp(tmp.c_str(), "22"))
+        val = 2;
+      //val = strtod(tmp.c_str(), NULL);
       if (nrow == 1)
       {
         if (mv[nrow-1].size() == ncol)
