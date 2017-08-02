@@ -6,10 +6,12 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_statistics.h>
 using namespace std;
 
-void readPED(string FILE, vector<vector<double> > &mv)
+void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, size_t &n1)
 {
   ifstream input(FILE.c_str());
   string line;
@@ -18,6 +20,9 @@ void readPED(string FILE, vector<vector<double> > &mv)
   double val;
   //vector<vector<double> > mv;
   size_t ncol = 0, nrow = 0;
+  n0 = 0;
+  nh = 0;
+  n1 = 0;
   while(getline(input, line))
   {
     nrow++;
@@ -37,11 +42,21 @@ void readPED(string FILE, vector<vector<double> > &mv)
         break;
       tmp = tmp1 + tmp2;
       if (strcmp(tmp.c_str(), "11"))
+      {
         val = 0;
+        n0++;
+      }
       else if (strcmp(tmp.c_str(), "12"))
-        val = 1;
+      {
+        val = 0.5;
+        nh++;
+      }
       else if (strcmp(tmp.c_str(), "22"))
-        val = 2;
+      {
+        val = 1;
+        n1++;
+      }
+
       //val = strtod(tmp.c_str(), NULL);
       if (nrow == 1)
       {
@@ -59,11 +74,44 @@ void readPED(string FILE, vector<vector<double> > &mv)
        << "nrow = " << nrow << endl;
 }
 
+void kinship(gsl_matrix* m, char* method, char* use, size_t &nh)
+{
+  if (strcmp("dominant",  method))
+  {
+
+  }
+  else if (strcmp("recessive", method))
+  {
+
+  }
+  else if (strcmp("additive", method))
+  {
+
+  }
+}
+
+void rowMeans(gsl_matrix *m, gsl_vector *rmu)
+{
+  gsl_vector *tmpRow = gsl_vector_calloc(m->size2);
+  double mu;
+  for (size_t i = 0; i < m->size1; i++)
+  {
+    gsl_matrix_get_row(tmpRow, m, i);
+    mu = gsl_stats_mean(tmpRow->data, 1, tmpRow->size);
+    if (mu > 0.5)
+      gsl_vector_set(rmu, i, 1);
+    else
+      gsl_vector_set(rmu, i, 0);
+  }
+}
+
+
 int main()
 {
   string filename = "../data/X.PED";
   vector<vector<double> > mv(1, vector<double>(1));
-  readPED(filename, mv);
+  size_t n0, nh, n1;
+  readPED(filename, mv, n0, nh, n1);
   gsl_matrix *m;
   size_t nrow = mv.size();
   size_t ncol = mv[0].size();
