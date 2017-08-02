@@ -50,4 +50,3 @@ kinshipFn <- function(G, method="additive", use="all") {
   }
   return(K)
 }
-
