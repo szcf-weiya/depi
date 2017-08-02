@@ -86,7 +86,7 @@ void kinship(gsl_matrix* m, char* method, char* use, size_t &nh)
   }
   else if (strcmp("additive", method))
   {
-
+    //TODO
   }
 }
 
