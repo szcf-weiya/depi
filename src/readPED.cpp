@@ -77,13 +77,6 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   mv.resize(nrow);
   cout << "ncol = " << ncol << endl
        << "nrow = " << nrow << endl;
-
-  for(size_t i = 2; i < 3; i++)
-  {
-    for (size_t j = 0; j < mv[0].size(); j++)
-      cout << mv[i][j];
-    cout << endl;
-  }
 }
 
 
@@ -278,13 +271,6 @@ int main()
     cout << "stop!" << endl;
     return 0;
   }
-  cout << "--------------------------------------" <<endl;
-  for(size_t i = 1; i < 2; i++)
-  {
-    for (size_t j = 0; j < mv[0].size(); j++)
-      cout << mv[i][j];
-    cout << endl;
-  }
   gsl_matrix *m;
   size_t nrow = mv.size();
   size_t ncol = mv[0].size();
@@ -294,6 +280,7 @@ int main()
     for (size_t j = 0; j < ncol; j++)
     {
       gsl_matrix_set(m, i, j, mv[i][j]);
+      cout << mv[i][j];
     }
   }
   cout << m->size1 <<"*" << m->size2 << endl;
@@ -301,13 +288,13 @@ int main()
        << nh << endl
        << n1 << endl
        << nNA << endl;
-cout << gsl_matrix_isnonneg(m) << endl;
+
   gsl_matrix *K = gsl_matrix_calloc(m->size2, m->size2);
 
   string method = "additive";
   string use = "all";
   kinship(m, method.c_str(), use.c_str(), nh, K);
-  FILE *output = fopen("../data/res_K.dat", "wb");
+  FILE *output = fopen("../data/res_K.dat", "w");
   gsl_matrix_fprintf(output, K, "%f");
   //gsl_matrix_fwrite(output, K);
   fclose(output);
