@@ -99,7 +99,7 @@ void subValue(gsl_matrix *m, gsl_vector *mu)
         continue;
       else
       {
-        if (gsl_fcmp(tmp, 0.5, ERR))
+        if (!gsl_fcmp(tmp, 0.5, ERR))
           gsl_matrix_set(m, i, j, gsl_vector_get(mu, i));
       }
     }
@@ -134,6 +134,7 @@ void rowMeans(gsl_matrix *m, gsl_vector *rmu)
     else
       gsl_vector_set(rmu, i, 0);
   }
+  gsl_vector_free(tmpRow);
 }
 
 bool isNanInVector(gsl_vector *v)
@@ -187,7 +188,8 @@ void kinship(gsl_matrix* m, const char* method, const char* use, size_t &nh, gsl
 
   if (!strcmp("additive", method) && (nh > 0))
   {
-    gsl_matrix *m2 = gsl_matrix_calloc(m->size1, m->size2);
+    gsl_matrix *m2 = gsl_matrix_calloc(m->size1, m->size2); // DO NOT forget
+    gsl_matrix_memcpy(m2, m);
     subValue(m, snp);
     subValue(m2, snp2);
     gsl_matrix *G = gsl_matrix_calloc(m->size1+m2->size1, m->size2);
@@ -196,7 +198,7 @@ void kinship(gsl_matrix* m, const char* method, const char* use, size_t &nh, gsl
     if (!strcmp(use, "all"))
     {
       rowMeans(G, rmu);
-      subNanValue(G, rmu);
+  //    subNanValue(G, rmu);
     }
     else if (!strcmp(use, "complete.obs"))
     {
@@ -206,7 +208,7 @@ void kinship(gsl_matrix* m, const char* method, const char* use, size_t &nh, gsl
     gsl_vector *xj = gsl_vector_calloc(G->size1);
     for (size_t i = 1; i < G->size2; i++)
     {
-      for (size_t j = 0; j < i-1; j++)
+      for (size_t j = 0; j < i; j++)
       {
         gsl_matrix_get_col(xi, G, i);
         gsl_matrix_get_col(xj, G, j);
@@ -280,7 +282,6 @@ int main()
     for (size_t j = 0; j < ncol; j++)
     {
       gsl_matrix_set(m, i, j, mv[i][j]);
-      cout << mv[i][j];
     }
   }
   cout << m->size1 <<"*" << m->size2 << endl;
@@ -294,10 +295,21 @@ int main()
   string method = "additive";
   string use = "all";
   kinship(m, method.c_str(), use.c_str(), nh, K);
-  FILE *output = fopen("../data/res_K.dat", "w");
-  gsl_matrix_fprintf(output, K, "%f");
+  ofstream output("../data/res_K.dat");
+  for (size_t i = 0; i < K->size1; i++)
+    for (size_t j = 0; j < K->size2; j++)
+    {
+      if (j!=K->size2-1)
+        output << gsl_matrix_get(K, i, j) << ",";
+      else
+        output << gsl_matrix_get(K, i, j) << endl;
+    }
+  output.close();
+
+  //FILE *output = fopen("../data/res_K.dat", "w");
+  //gsl_matrix_fprintf(output, K, "%f");
   //gsl_matrix_fwrite(output, K);
-  fclose(output);
+  //fclose(output);
 
   gsl_matrix_free(m);
   gsl_matrix_free(K);
