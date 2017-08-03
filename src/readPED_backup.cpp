@@ -31,6 +31,8 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   while(getline(input, line))
   {
     nrow++;
+    if (nrow != 1)
+      mv[nrow-1].resize(ncol);
     if (mv.size() == nrow)
       mv.resize(mv.size()*2);
     ss.clear();
@@ -67,23 +69,28 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
 
       //val = strtod(tmp.c_str(), NULL);
       if (nrow == 1)
+      {
+        if (mv[nrow-1].size() == ncol)
+          mv[nrow-1].resize(ncol*2);
         ncol++;
+      }
       mv[nrow-1].push_back(val);
     }
     if (nrow == 1)
       mv[nrow-1].resize(ncol);
   }
   input.close();
-  mv.resize(nrow);
+  //mv.resize(nrow);
   cout << "ncol = " << ncol << endl
        << "nrow = " << nrow << endl;
-
-  for(size_t i = 2; i < 3; i++)
+       /*
+  for(size_t i = 0; i < mv.size(); i++)
   {
     for (size_t j = 0; j < mv[0].size(); j++)
       cout << mv[i][j];
     cout << endl;
   }
+  */
 }
 
 
@@ -278,13 +285,7 @@ int main()
     cout << "stop!" << endl;
     return 0;
   }
-  cout << "--------------------------------------" <<endl;
-  for(size_t i = 1; i < 2; i++)
-  {
-    for (size_t j = 0; j < mv[0].size(); j++)
-      cout << mv[i][j];
-    cout << endl;
-  }
+
   gsl_matrix *m;
   size_t nrow = mv.size();
   size_t ncol = mv[0].size();
