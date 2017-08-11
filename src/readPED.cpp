@@ -11,6 +11,9 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_statistics.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_eigen.h>
+
 using namespace std;
 
 #define ERR 1e-10
@@ -262,6 +265,18 @@ void kinship(gsl_matrix* m, const char* method, const char* use, size_t &nh, gsl
   gsl_vector_free(snp2);
 }
 
+void eigen(const gsl_matrix *K, gsl_vector *eval, gsl_matrix *evec)
+{
+  // matrix K is symmetric
+  gsl_matrix *KK = gsl_matrix_alloc(K->size1, K->size2);
+  gsl_matrix_memcpy(KK, K);
+  gsl_eigen_symmv_workspace *w = gsl_eigen_symmv_alloc(K->size1);
+  gsl_eigen_symmv(KK, eval, evec, w);
+  gsl_eigen_symmv_free(w);
+  gsl_matrix_free(KK);
+  gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_ABS_ASC);
+}
+
 int main()
 {
   string filename = "../data/X.PED";
@@ -295,6 +310,12 @@ int main()
   string method = "additive";
   string use = "all";
   kinship(m, method.c_str(), use.c_str(), nh, K);
+  gsl_matrix *evec = gsl_matrix_alloc(K->size1, K->size2);
+  gsl_vector *eval = gsl_vector_alloc(K->size1);
+  eigen(K, eval, evec);
+  for (size_t i = 0; i < K->size1; i++)
+    cout << gsl_vector_get(eval, i) << endl;
+  /*
   ofstream output("../data/res_K.dat");
   for (size_t i = 0; i < K->size1; i++)
     for (size_t j = 0; j < K->size2; j++)
@@ -305,7 +326,7 @@ int main()
         output << gsl_matrix_get(K, i, j) << endl;
     }
   output.close();
-
+  */
   //FILE *output = fopen("../data/res_K.dat", "w");
   //gsl_matrix_fprintf(output, K, "%f");
   //gsl_matrix_fwrite(output, K);
@@ -313,5 +334,7 @@ int main()
 
   gsl_matrix_free(m);
   gsl_matrix_free(K);
+  gsl_matrix_free(evec);
+  gsl_vector_free(eval);
   return 0;
 }
