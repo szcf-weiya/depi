@@ -10,7 +10,7 @@ Detect Epi
 Detect Epi
 }
 \usage{
-DetectEpi(inputfile_X, inputfile_Y, inputfile_COV, MAX_ROW, MAX_COL, IS_EXIST_COV)
+DetectEpi(inputfile_X, inputfile_Y, inputfile_COV)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,10 +19,7 @@ DetectEpi(inputfile_X, inputfile_Y, inputfile_COV, MAX_ROW, MAX_COL, IS_EXIST_CO
 %%     ~~Describe \code{x} here~~
 }
 \item{inputfile_Y}{Y's filename}
-\item{inputfile_COV}{COV's filename}
-\item{MAX_ROW}{The row number of X}
-\item{MAX_COL}{The col number of X}
-\item{IS_EXIST_COV}{Whether consider cov's effect}
+\item{inputfile_COV}{COV's filename. It can be NULL when does not consider covariates, otherwise, it would consider 4 covariates default.}
 }
 \value{
 %%  ~Describe the value returned
@@ -39,8 +36,14 @@ Lijun Wang
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\examples{
-%}
+\examples{
+## Consider covariates
+
+## DetectEpi("data/Data.txt", "data/Y.FA.txt", NULL)
+
+## DO NOT consider covariates.
+## DetectEpi("data/Data.txt", "data/Y.FA.txt", "data/cov.txt")
+}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ DetectEpi }% __ONLY ONE__ keyword per line

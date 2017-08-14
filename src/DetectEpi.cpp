@@ -18,6 +18,8 @@
 #include<gsl/gsl_cdf.h>
 #include<omp.h>
 
+#include "safeGetline.h"
+
 using namespace std;
 
 //#define MAX_ROW 305
@@ -41,7 +43,7 @@ void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname,
   *nrow = 0;
   *ncol = 0;
   // the first line
-  getline(input, line);
+  safeGetline(input, line);
   stringstream ss(line);
   while(!ss.eof())
   {
@@ -51,7 +53,7 @@ void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname,
   }
   //cout << colname.size() << endl;
 
-  while (getline(input, line)) {
+  while (!safeGetline(input, line).eof()) {
     mv[*nrow].resize(*ncol);
     if(mv.size() == *nrow+1)
       mv.resize(mv.size()*2);
@@ -81,7 +83,7 @@ void readData(string FILE, gsl_matrix *m, int row, int col, vector<string> &rown
   // colnames
   string line;
   // the first line
-  getline(input, line);
+  safeGetline(input, line);
   stringstream ss(line);
   //ss >> tmp; // null no need!!!
   for (size_t i = 0; i < col; i++)
@@ -93,7 +95,7 @@ void readData(string FILE, gsl_matrix *m, int row, int col, vector<string> &rown
 
   for (size_t i = 0; i < row; i++)
     {
-      getline(input, line);
+      safeGetline(input, line);
       stringstream ss(line);
       ss >> tmp; // rowname
       rowname.push_back(tmp);
@@ -109,16 +111,24 @@ void readData(string FILE, gsl_matrix *m, int row, int col, vector<string> &rown
 
 //[[Rcpp::export]]
 
-Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV, bool IS_EXIST_COV)
+Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
 {
   // convert file name
   Rcpp::CharacterVector r_inputfile_X(inputfile_X);
   Rcpp::CharacterVector r_inputfile_Y(inputfile_Y);
-  Rcpp::CharacterVector r_inputfile_COV(inputfile_COV);
+
   string file_X = Rcpp::as<string>(r_inputfile_X);
   string file_Y = Rcpp::as<string>(r_inputfile_Y);
-  string file_COV = Rcpp::as<string>(r_inputfile_COV);
 
+  bool IS_EXIST_COV = FALSE;
+  string file_COV;
+  // check cov file is null or not
+  if(!Rf_isNull(inputfile_COV))
+  {
+    Rcpp::CharacterVector r_inputfile_COV(inputfile_COV);
+    file_COV = Rcpp::as<string>(r_inputfile_COV);
+    IS_EXIST_COV = TRUE;
+  }
   // read data X
   //gsl_matrix *G = gsl_matrix_alloc(MAX_ROW, MAX_COL);
   vector<string> G_colname;
@@ -129,11 +139,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV, boo
   readData(file_X.c_str(), mv, G_rowname, G_colname, &nrow, &ncol);
   cout << ncol << endl;
   gsl_matrix *G = gsl_matrix_calloc(nrow, ncol);
-  cout << mv.size() << " " << mv[0].size() << endl;
-  cout << nrow << " " << ncol << endl;
-  cout << G->size1 << " " << G->size2 << endl;
-  cout << mv[0][0] << endl;
-  cout << mv[0][10] << endl;
+
   for (size_t i = 0; i < nrow; i++)
     for (size_t j = 0; j < ncol; j++)
       gsl_matrix_set(G, i, j, mv[i][j]);
