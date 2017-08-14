@@ -318,7 +318,7 @@ void eigen(const gsl_matrix *K, gsl_vector *eval, gsl_matrix *evec)
 //[[Rcpp::export]]
 Rcpp::List eigenK(SEXP inputFile)
 {
-  Rcpp::CharacterVector r_inputfile(inputFile);
+  Rcpp::CharacterVector r_inputFile(inputFile);
   string FILE = Rcpp::as<string>(r_inputFile);
 
   vector<vector<double> > mv(1, vector<double>(1));
@@ -327,7 +327,7 @@ Rcpp::List eigenK(SEXP inputFile)
   if (n0+nh+n1+nNA != mv.size()*mv[0].size())
   {
     cout << "stop!" << endl;
-    return;
+    return Rcpp::List::create(Rcpp::Named("status") = "Fail! n0 + nh + n1 + nNA neq the total number of elements");
   }
   gsl_matrix *m;
   size_t nrow = mv.size();
@@ -383,5 +383,4 @@ Rcpp::List eigenK(SEXP inputFile)
   Rcpp::List output = Rcpp::List::create(Rcpp::Named("eigen value") = eval,
                                                    Rcpp::Named("eigen vector") = evec);
   return output;
-
 }
