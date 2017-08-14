@@ -1,3 +1,5 @@
+// [[Rcpp::depends(RcppGSL)]]
+#include <RcppGSL.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -312,8 +314,13 @@ void eigen(const gsl_matrix *K, gsl_vector *eval, gsl_matrix *evec)
   gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_ABS_ASC);
 }
 
-void eigenK(string FILE)
+
+//[[Rcpp::export]]
+Rcpp::List eigenK(SEXP inputFile)
 {
+  Rcpp::CharacterVector r_inputfile(inputFile);
+  string FILE = Rcpp::as<string>(r_inputFile);
+
   vector<vector<double> > mv(1, vector<double>(1));
   size_t n0, nh, n1, nNA;
   readPED(FILE, mv, n0, nh, n1, nNA);
@@ -344,8 +351,10 @@ void eigenK(string FILE)
   string method = "additive";
   string use = "all";
   kinship(m, method.c_str(), use.c_str(), nh, K);
-  gsl_matrix *evec = gsl_matrix_alloc(K->size1, K->size2);
-  gsl_vector *eval = gsl_vector_alloc(K->size1);
+  //gsl_matrix *evec = gsl_matrix_alloc(K->size1, K->size2);
+  //gsl_vector *eval = gsl_vector_alloc(K->size1);
+  RcppGSL::matrix<double> evec(K->size1, K->size2);
+  RcppGSL::vector<double> eval(K->size1);
   eigen(K, eval, evec);
   //for (size_t i = 0; i < K->size1; i++)
     //cout << gsl_vector_get(eval, i) << endl;
@@ -370,9 +379,9 @@ void eigenK(string FILE)
   gsl_matrix_free(K);
   gsl_matrix_free(evec);
   gsl_vector_free(eval);
-}
 
-int main(int argc, char const *argv[]) {
-  eigenK("../data/X.PED");
-  return 0;
+  Rcpp::List output = Rcpp::List::create(Rcpp::Named("eigen value") = eval,
+                                                   Rcpp::Named("eigen vector") = evec);
+  return output;
+
 }
