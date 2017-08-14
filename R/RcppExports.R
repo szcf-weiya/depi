@@ -5,11 +5,11 @@ DetectEpi <- function(inputfile_X, inputfile_Y, inputfile_COV, IS_EXIST_COV) {
     .Call('_depi_DetectEpi', PACKAGE = 'depi', inputfile_X, inputfile_Y, inputfile_COV, IS_EXIST_COV)
 }
 
-readPED <- function(){
-  
+eigenK <- function(inputFile){
+  .Call('_depi_eigenK', PACKAGE = 'depi', inputFile)
+
 }
 
 rcpp_hello <- function() {
     .Call('_depi_rcpp_hello', PACKAGE = 'depi')
 }
-
