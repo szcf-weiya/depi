@@ -31,6 +31,42 @@ using namespace std;
 #define coef(i) (gsl_vector_get(coef, (i)))
 #define COV(i, j) (gsl_matrix_get(cov, (i), (j)))
 
+
+// https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
+
+std::istream& safeGetline(std::istream& is, std::string& t)
+{
+    t.clear();
+
+    // The characters in the stream are read one-by-one using a std::streambuf.
+    // That is faster than reading them one-by-one using the std::istream.
+    // Code that uses streambuf this way must be guarded by a sentry object.
+    // The sentry object performs various tasks,
+    // such as thread synchronization and updating the stream state.
+
+    std::istream::sentry se(is, true);
+    std::streambuf* sb = is.rdbuf();
+
+    for(;;) {
+        int c = sb->sbumpc();
+        switch (c) {
+        case '\n':
+            return is;
+        case '\r':
+            if(sb->sgetc() == '\n')
+                sb->sbumpc();
+            return is;
+        case EOF:
+            // Also handle the case when the last line has no line ending
+            if(t.empty())
+                is.setstate(std::ios::eofbit);
+            return is;
+        default:
+            t += (char)c;
+        }
+    }
+}
+
 // readData when unknown nrow and ncol
 void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname, vector<string> &colname, size_t *nrow, size_t *ncol)
 {
@@ -41,7 +77,8 @@ void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname,
   *nrow = 0;
   *ncol = 0;
   // the first line
-  getline(input, line);
+  //getline(input, line);
+  safeGetline(input, line);
   stringstream ss(line);
   while(!ss.eof())
   {
@@ -51,7 +88,7 @@ void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname,
   }
   cout << colname.size() << endl;
 
-  while (getline(input, line)) {
+  while (safeGetline(input, line)) {
     mv[*nrow].resize(*ncol);
     if(mv.size() == *nrow+1)
       mv.resize(mv.size()*2);
@@ -82,7 +119,7 @@ void readData(char* FILE, gsl_matrix *m, int row, int col, vector<string> &rowna
   // colnames
   string line;
   // the first line
-  getline(input, line);
+  safeGetline(input, line);
   stringstream ss(line);
   // ss >> tmp; // null no need!!
   //  cout << tmp << endl;
@@ -95,7 +132,7 @@ void readData(char* FILE, gsl_matrix *m, int row, int col, vector<string> &rowna
 
   for (size_t i = 0; i < row; i++)
     {
-      getline(input, line);
+      safeGetline(input, line);
       stringstream ss(line);
       ss >> tmp; // rowname
       rowname.push_back(tmp);
