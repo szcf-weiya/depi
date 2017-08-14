@@ -31,13 +31,53 @@ using namespace std;
 #define coef(i) (gsl_vector_get(coef, (i)))
 #define COV(i, j) (gsl_matrix_get(cov, (i), (j)))
 
+// readData when unknown nrow and ncol
+void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname, vector<string> &colname, size_t *nrow, size_t *ncol)
+{
+  ifstream input(FILE.c_str());
+  string line;
+  string tmp, tmpp;
+  double val;
+  *nrow = 0;
+  *ncol = 0;
+  // the first line
+  getline(input, line);
+  stringstream ss(line);
+  while(!ss.eof())
+  {
+    ss >> tmp;
+    colname.push_back(tmp);
+    (*ncol)++;
+  }
+  cout << colname.size() << endl;
+
+  while (getline(input, line)) {
+    mv[*nrow].resize(*ncol);
+    if(mv.size() == *nrow+1)
+      mv.resize(mv.size()*2);
+    ss.clear();
+    stringstream ss(line);
+    ss >> tmp; // rowname
+    rowname.push_back(tmp);
+    for (size_t j = 0; j < *ncol; j++)
+    {
+      ss >> tmp;
+      val = strtod(tmp.c_str(), NULL); // transfer str to double
+      mv[*nrow].push_back(val);
+    }
+    (*nrow)++;
+  }
+  input.close();
+  mv.resize(*nrow);
+}
+
 void readData(char* FILE, gsl_matrix *m, int row, int col, vector<string> &rowname, vector<string> &colname)
 {
   ifstream input(FILE);
   string tmp, tmpp;
   //  vector<string> rowname;
   //vector<string> colname;
-  
+
   double val;
   // colnames
   string line;
@@ -51,9 +91,8 @@ void readData(char* FILE, gsl_matrix *m, int row, int col, vector<string> &rowna
       ss >> tmp;
       tmpp = tmp.substr(1, tmp.size() - 2);
       colname.push_back(tmpp);
-      
     }
-  
+
   for (size_t i = 0; i < row; i++)
     {
       getline(input, line);
@@ -80,13 +119,18 @@ int main()
   /////////////////////////////////////
   FILE *output;
   output = fopen("res_gsl.txt", "w");
-  char FILE[] = "Data.txt";
+  char FILE[] = "../data/Data.txt";
   gsl_matrix *G = gsl_matrix_alloc(MAX_ROW, MAX_COL);
   vector<string> G_colname;
   vector<string> G_rowname;
-  readData(FILE, G, MAX_ROW, MAX_COL, G_rowname, G_colname);
+  size_t nrow, ncol;
+  vector<vector<double> > mv(1, vector<double>(1));
+  readData(FILE, mv, G_rowname, G_colname, &nrow, &ncol);
+  //readData(FILE, G, MAX_ROW, MAX_COL, G_rowname, G_colname);
   cout << G_colname[0] << endl
        << G_colname[1] << endl;
+
+/*
   //  ifstream input3("cov.txt");
   char FILE3[] = "cov.txt";
   gsl_matrix *coveriate = gsl_matrix_alloc(MAX_ROW, COV_COL);
@@ -98,7 +142,7 @@ int main()
   //   read data Y.FA
   //
   /////////////////////////////////
-  
+
   ifstream input2("Y.FA.txt");
   double val;
   gsl_vector *Y = gsl_vector_alloc(MAX_ROW);
@@ -108,25 +152,6 @@ int main()
       gsl_vector_set(Y, i, val);
     }
   input2.close();
-  ///////////////////////////////////////
-  //
-  // combination
-  //
-  //////////////////////////////////////
-  /*
-  gsl_combination *c;
-  vector<size_t> r1, r2;
-  //  size_t k = 2;
-  size_t *res;
-  res = (size_t*)malloc(sizeof(size_t)*2);
-  c = gsl_combination_calloc(MAX_COL, 2);
-  do{
-    res = gsl_combination_data(c);
-    r1.push_back(res[0]);
-    r2.push_back(res[1]);
-  }while(gsl_combination_next(c) == GSL_SUCCESS);
-  cout << r1.size() << " " << r2.size() << endl;
-  */
   ////////////////////////////////////////
   //
   //  main
@@ -166,7 +191,7 @@ int main()
   //# pragma omp parallel
   //# pragma omp for schedule(dynamic) // relatively slow
   gsl_matrix_set_col(X, 0, x0);
-  gsl_vector *x1 = gsl_vector_alloc(MAX_ROW);	
+  gsl_vector *x1 = gsl_vector_alloc(MAX_ROW);
   for (int i = 0; i < MAX_COL/100; i++)
     {
       # pragma omp sections
@@ -191,7 +216,7 @@ int main()
 	  double stderr, t;
 	  double pvalue[3];
 	  df = MAX_ROW - p;
-	  
+
 	  gsl_matrix_get_col(x2, G, j);
 	  // if same
 	  max_val = gsl_vector_max(x2);
@@ -202,7 +227,7 @@ int main()
 	      continue;
 	    }
 	  gsl_matrix_set_col(X, 2, x2);
-	  
+
 	  double res_corr = (float)gsl_stats_correlation(x1->data, 1, x2->data, 1, MAX_ROW);
 	  if (fabs(res_corr) >= MAX_PAIR_CORR)
 	    continue;
@@ -210,7 +235,7 @@ int main()
 	  gsl_matrix_get_col(x3, G, i);
 	  gsl_vector_mul(x3, x2);
 	  gsl_vector_free(x2);
-	  
+
 	  max_val = gsl_vector_max(x3);
 	  //	  min_val = gsl_vector_min(x3);
 	  if (max_val == 0)
@@ -218,11 +243,11 @@ int main()
 	      gsl_vector_free(x3);
 	      continue;
 	    }
-	  
+
 	  gsl_matrix_set_col(X, 3, x3);
-	  
+
 	  gsl_vector_free(x3);
-	  
+
 	  gsl_multifit_linear_workspace *work = gsl_multifit_linear_alloc(MAX_ROW, p);
 	  gsl_matrix *cov;
 	  gsl_vector *coef;
@@ -233,7 +258,7 @@ int main()
 	  gsl_multifit_linear(X, Y, coef, cov, &chisq, work);
 	  gsl_multifit_linear_free(work);
 	  flag = 1;
-	      
+
 	  for (int k = 1; k < p; k++){
 	    if (coef(k) > MAX_EPS)
 	      flag = 0;
@@ -250,20 +275,9 @@ int main()
 	      gsl_vector_free(coef);
 	      continue;
 	    }
-	  /*
-	    #pragma omp parallel
-	    #pragma omp for schedule(dynamic)
-	    for (int ii = 1; ii < 3; ii++) // discard the p-value for intercept
-	    {
-	    stderr = sqrt(COV(ii, ii));
-	    t = coef(ii) / stderr;
-	    pvalue[ii-1] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));
-	    }
-	  */
-	    
 	  stderr = sqrt(COV(2, 2));
 	  t = coef(2) / stderr;
-	  pvalue[1] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));	    
+	  pvalue[1] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));
 	  stderr = sqrt(COV(1, 1));
 	  t = coef(1) / stderr;
 	  pvalue[0] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));
@@ -273,17 +287,9 @@ int main()
 	  fprintf(output, "%d\t%d\t%.6f\t%.6f\t%.10f\n", i, j, pvalue[0], pvalue[1], pvalue[2]);
 	}
     }
-  /*
-  gsl_vector *x1055 = gsl_vector_alloc(MAX_ROW);
-  gsl_matrix_get_col(x1055, G, 1055);
-  gsl_vector *x1056 = gsl_vector_alloc(MAX_ROW);
-  gsl_matrix_get_col(x1056, G, 1056);
-  gsl_vector *x1057 = gsl_vector_alloc(MAX_ROW);
-  gsl_matrix_get_col(x1057, G, 1057);
-  */
   //for (int i = 0; i < MAX_ROW; i++)
   // cout << x1055->data[i] << ", " << x1056->data[i] << ", " << x1057->data[i] << endl;
-  
+
   //  stop = clock();
   //  cout << "Done!" << (float)(stop-start)/CLOCKS_PER_SEC << endl;
   gsl_vector_free(x0);
@@ -293,6 +299,7 @@ int main()
   gsl_matrix_free(G);
   fclose(output);
   //  output.close();
+  */
   return 0;
-}
 
+}
