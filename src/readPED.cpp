@@ -31,6 +31,7 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   nh = 0;
   n1 = 0;
   nNA = 0;
+  int test = 0;
   while(getline(input, line))
   {
     nrow++;
@@ -40,12 +41,24 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
     ss.str(line);
     // discard the first six elements
     for (size_t i = 0; i < 6; i++)
-      ss >> tmp;
+      { ss >> tmp;
+        if (nrow == 1)
+          cout <<  tmp << endl;
+      }
     while (!ss.eof()) {
-      ss >> tmp1 >> tmp2;
-      // must judge eof status!!!
-      if(ss.eof())
+      ss >> tmp1;
+      if (ss.eof())
         break;
+      ss >> tmp2;
+      if(nrow == 1)
+      {
+        test++;
+        //cout << tmp1 << " " << tmp2 << endl;
+      }
+
+      // must judge eof status!!!
+    //  if(ss.eof())
+    //    break;
       tmp = tmp1 + tmp2;
       if (!strcmp(tmp.c_str(), "11"))
       {
@@ -78,6 +91,7 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   }
   input.close();
   mv.resize(nrow);
+  cout << "test = " << test << endl;
   cout << "ncol = " << ncol << endl
        << "nrow = " << nrow << endl;
 }
@@ -277,16 +291,15 @@ void eigen(const gsl_matrix *K, gsl_vector *eval, gsl_matrix *evec)
   gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_ABS_ASC);
 }
 
-int main()
+void eigenK(string FILE)
 {
-  string filename = "../data/X.PED";
   vector<vector<double> > mv(1, vector<double>(1));
   size_t n0, nh, n1, nNA;
-  readPED(filename, mv, n0, nh, n1, nNA);
+  readPED(FILE, mv, n0, nh, n1, nNA);
   if (n0+nh+n1+nNA != mv.size()*mv[0].size())
   {
     cout << "stop!" << endl;
-    return 0;
+    return;
   }
   gsl_matrix *m;
   size_t nrow = mv.size();
@@ -313,8 +326,8 @@ int main()
   gsl_matrix *evec = gsl_matrix_alloc(K->size1, K->size2);
   gsl_vector *eval = gsl_vector_alloc(K->size1);
   eigen(K, eval, evec);
-  for (size_t i = 0; i < K->size1; i++)
-    cout << gsl_vector_get(eval, i) << endl;
+  //for (size_t i = 0; i < K->size1; i++)
+    //cout << gsl_vector_get(eval, i) << endl;
   /*
   ofstream output("../data/res_K.dat");
   for (size_t i = 0; i < K->size1; i++)
@@ -336,5 +349,9 @@ int main()
   gsl_matrix_free(K);
   gsl_matrix_free(evec);
   gsl_vector_free(eval);
+}
+
+int main(int argc, char const *argv[]) {
+  eigenK("../data/X.PED");
   return 0;
 }
