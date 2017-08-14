@@ -137,7 +137,6 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
   vector<vector<double> > mv(1, vector<double>(1));
   size_t nrow, ncol;
   readData(file_X.c_str(), mv, G_rowname, G_colname, &nrow, &ncol);
-  cout << ncol << endl;
   gsl_matrix *G = gsl_matrix_calloc(nrow, ncol);
 
   for (size_t i = 0; i < nrow; i++)
@@ -201,8 +200,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
   //# pragma omp for schedule(dynamic) // relatively slow
   gsl_matrix_set_col(X, 0, x0);
   gsl_vector *x1 = gsl_vector_alloc(nrow);
-  cout << "hello "<< endl;
-  for (int i = 0; i < ncol/100; i++)
+  for (int i = 0; i < ncol; i++)
   {
 # pragma omp sections
 {
