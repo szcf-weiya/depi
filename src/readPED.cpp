@@ -18,6 +18,41 @@ using namespace std;
 
 #define ERR 1e-10
 
+// from https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf/6089413#6089413
+
+std::istream& safeGetline(std::istream& is, std::string& t)
+{
+    t.clear();
+
+    // The characters in the stream are read one-by-one using a std::streambuf.
+    // That is faster than reading them one-by-one using the std::istream.
+    // Code that uses streambuf this way must be guarded by a sentry object.
+    // The sentry object performs various tasks,
+    // such as thread synchronization and updating the stream state.
+
+    std::istream::sentry se(is, true);
+    std::streambuf* sb = is.rdbuf();
+
+    for(;;) {
+        int c = sb->sbumpc();
+        switch (c) {
+        case '\n':
+            return is;
+        case '\r':
+            if(sb->sgetc() == '\n')
+                sb->sbumpc();
+            return is;
+        case EOF:
+            // Also handle the case when the last line has no line ending
+            if(t.empty())
+                is.setstate(std::ios::eofbit);
+            return is;
+        default:
+            t += (char)c;
+        }
+    }
+}
+
 void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, size_t &n1, size_t &nNA)
 {
   ifstream input(FILE.c_str());
@@ -31,8 +66,7 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   nh = 0;
   n1 = 0;
   nNA = 0;
-  int test = 0;
-  while(getline(input, line))
+  while(!safeGetline(input, line).eof())
   {
     nrow++;
     if (mv.size() == nrow)
@@ -41,22 +75,10 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
     ss.str(line);
     // discard the first six elements
     for (size_t i = 0; i < 6; i++)
-      { ss >> tmp;
-        if (nrow == 1)
-          cout <<  tmp << endl;
-      }
+      ss >> tmp;
     while (!ss.eof()) {
-      ss >> tmp1;
-      if (ss.eof())
-        break;
-      ss >> tmp2;
-      if(nrow == 1)
-      {
-        test++;
-        //cout << tmp1 << " " << tmp2 << endl;
-      }
-
-      // must judge eof status!!!
+      ss >> tmp1 >> tmp2;
+      // must judge eof status!!! // no need
     //  if(ss.eof())
     //    break;
       tmp = tmp1 + tmp2;
@@ -91,7 +113,6 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   }
   input.close();
   mv.resize(nrow);
-  cout << "test = " << test << endl;
   cout << "ncol = " << ncol << endl
        << "nrow = " << nrow << endl;
 }
