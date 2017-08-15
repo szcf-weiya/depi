@@ -84,8 +84,8 @@ void readPED(string FILE, vector<vector<double> > &mv, size_t &n0, size_t &nh, s
   }
   input.close();
   mv.resize(nrow);
-  cout << "ncol = " << ncol << endl
-       << "nrow = " << nrow << endl;
+  //cout << "ncol = " << ncol << endl
+       //<< "nrow = " << nrow << endl;
 }
 
 
@@ -295,8 +295,9 @@ Rcpp::List eigenK(SEXP inputFile)
   readPED(FILE, mv, n0, nh, n1, nNA);
   if (n0+nh+n1+nNA != mv.size()*mv[0].size())
   {
-    cout << "stop!" << endl;
-    return Rcpp::List::create(Rcpp::Named("status") = "Fail! n0 + nh + n1 + nNA neq the total number of elements");
+    //cout << "stop!" << endl;
+    return R_NilValue;
+    //return Rcpp::List::create(Rcpp::Named("status") = "Fail! n0 + nh + n1 + nNA neq the total number of elements");
   }
   gsl_matrix *m;
   size_t nrow = mv.size();
@@ -309,11 +310,11 @@ Rcpp::List eigenK(SEXP inputFile)
       gsl_matrix_set(m, i, j, mv[i][j]);
     }
   }
-  cout << m->size1 <<"*" << m->size2 << endl;
-  cout << n0 << endl
-       << nh << endl
-       << n1 << endl
-       << nNA << endl;
+  //cout << m->size1 <<"*" << m->size2 << endl;
+  //cout << n0 << endl
+  //     << nh << endl
+  //     << n1 << endl
+  //     << nNA << endl;
 
   gsl_matrix *K = gsl_matrix_calloc(m->size2, m->size2);
 

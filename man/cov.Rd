@@ -3,3 +3,4 @@
 
 \title{cov data file}
 
+\description{The covariate dataset.}
