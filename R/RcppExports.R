@@ -2,14 +2,14 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 DetectEpi <- function(inputfile_X, inputfile_Y, inputfile_COV) {
-    .Call('_depi_DetectEpi', PACKAGE = 'depi', inputfile_X, inputfile_Y, inputfile_COV)
+    .Call('depi_DetectEpi', PACKAGE = 'depi', inputfile_X, inputfile_Y, inputfile_COV)
 }
 
 rcpp_hello <- function() {
-    .Call('_depi_rcpp_hello', PACKAGE = 'depi')
+    .Call('depi_rcpp_hello', PACKAGE = 'depi')
 }
 
 eigenK <- function(inputFile) {
-    .Call('_depi_eigenK', PACKAGE = 'depi', inputFile)
+    .Call('depi_eigenK', PACKAGE = 'depi', inputFile)
 }
 
