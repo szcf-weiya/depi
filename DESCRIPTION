@@ -1,10 +1,10 @@
 Package: depi
 Type: Package
-Title: Detect epi interaction.
+Title: Detect Epi Interaction
 Version: 0.2.0
 Author: Lijun Wang
 Maintainer: Lijun Wang <szcfweiya@gmail.com>
-Description: Detect epi interaction
+Description: Detect the interaction between genes by computing the p-value of the coefficient of the interaction term in a regression model.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
