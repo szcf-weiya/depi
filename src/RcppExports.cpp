@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // DetectEpi
 Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV);
-RcppExport SEXP depi_DetectEpi(SEXP inputfile_XSEXP, SEXP inputfile_YSEXP, SEXP inputfile_COVSEXP) {
+RcppExport SEXP _depi_DetectEpi(SEXP inputfile_XSEXP, SEXP inputfile_YSEXP, SEXP inputfile_COVSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // rcpp_hello
 List rcpp_hello();
-RcppExport SEXP depi_rcpp_hello() {
+RcppExport SEXP _depi_rcpp_hello() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,7 +30,7 @@ END_RCPP
 }
 // eigenK
 Rcpp::List eigenK(SEXP inputFile);
-RcppExport SEXP depi_eigenK(SEXP inputFileSEXP) {
+RcppExport SEXP _depi_eigenK(SEXP inputFileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,4 +38,16 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(eigenK(inputFile));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_depi_DetectEpi", (DL_FUNC) &_depi_DetectEpi, 3},
+    {"_depi_rcpp_hello", (DL_FUNC) &_depi_rcpp_hello, 0},
+    {"_depi_eigenK", (DL_FUNC) &_depi_eigenK, 1},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_depi(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -1,4 +1,4 @@
 ## This assumes that the LIB_GSL variable points to working GSL libraries
-PKG_CPPFLAGS=-I$(LIB_GSL)/include -I../inst/include
-PKG_LIBS=-L$(LIB_GSL)/lib -lgsl -lgslcblas 
+PKG_CPPFLAGS=-I"C:\Users\weiya\Documents\GitHub\GSLwin\include" -I../inst/include
+PKG_LIBS=-L"C:\Users\weiya\Documents\GitHub\GSLwin\lib" -lgsl -lgslcblas 
 

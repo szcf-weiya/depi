@@ -27,7 +27,7 @@ using namespace std;
 #define COV_COL 4
 #define MAX_PAIR_CORR 0.98
 #define MAX_EPS 1e+12
-#define MIN_P_VALUE 0.001
+#define MIN_P_VALUE 0.01
 
 
 #define coef(i) (gsl_vector_get(coef, (i)))
@@ -221,7 +221,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
 
       size_t flag, df;
 
-      double stderr, t;
+      double std_err, t;
       double pvalue[3];
       df = nrow - p;
 
@@ -274,8 +274,8 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
       if (flag == 0)
         continue;
       // compute p-value for interaction first
-      stderr = sqrt(COV(3, 3));
-      t = coef(3) / stderr;
+      std_err = sqrt(COV(3, 3));
+      t = coef(3) / std_err;
       pvalue[2] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));
       if (pvalue[2] > MIN_P_VALUE)
       {
@@ -283,11 +283,11 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
         gsl_vector_free(coef);
         continue;
       }
-      stderr = sqrt(COV(2, 2));
-      t = coef(2) / stderr;
+      std_err = sqrt(COV(2, 2));
+      t = coef(2) / std_err;
       pvalue[1] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));
-      stderr = sqrt(COV(1, 1));
-      t = coef(1) / stderr;
+      std_err = sqrt(COV(1, 1));
+      t = coef(1) / std_err;
       pvalue[0] = 2*(t < 0 ? (1 - gsl_cdf_tdist_P(-t, df)) : (1 - gsl_cdf_tdist_P(t, df)));
       gsl_matrix_free(cov);
       gsl_vector_free(coef);
