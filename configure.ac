@@ -18,7 +18,8 @@ fi
 dnl check openmp.h
 AC_CHECK_HEADER(omp.h)
 if test "${ac_cv_header_omp_h}" = yes; then
-  omp_CFLAGS="-fopenmp"
+dnl  omp_CFLAGS="-fopenmp"
+  omp_CFLAGS=""
   depi_CFLAGS="${GSL_CFLAGS} ${omp_CFLAGS}"
 else
   depi_CFLAGS="${GSL_CFLAGS}"

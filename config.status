@@ -427,7 +427,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/weiya/depi0908/depi'
+ac_pwd='/media/weiya/9CE43864E43842B6/Project/epistasis/depi'
 srcdir='.'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
@@ -583,7 +583,7 @@ echo 'BEGIN {' >"$ac_tmp/subs1.awk" &&
 cat >>"$ac_tmp/subs1.awk" <<\_ACAWK &&
 S["LTLIBOBJS"]=""
 S["LIBOBJS"]=""
-S["depi_CFLAGS"]="-I/usr/local/include -fopenmp"
+S["depi_CFLAGS"]="-I/usr/local/include "
 S["GSL_LIBS"]="-L/usr/local/lib -lgsl -lgslcblas -lm"
 S["EGREP"]="/bin/grep -E"
 S["GREP"]="/bin/grep"
@@ -616,6 +616,7 @@ S["infodir"]="${datarootdir}/info"
 S["docdir"]="${datarootdir}/doc/${PACKAGE_TARNAME}"
 S["oldincludedir"]="/usr/include"
 S["includedir"]="${prefix}/include"
+S["runstatedir"]="${localstatedir}/run"
 S["localstatedir"]="${prefix}/var"
 S["sharedstatedir"]="${prefix}/com"
 S["sysconfdir"]="${prefix}/etc"

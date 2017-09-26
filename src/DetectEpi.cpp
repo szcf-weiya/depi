@@ -200,6 +200,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
   //# pragma omp for schedule(dynamic) // relatively slow
   gsl_matrix_set_col(X, 0, x0);
   gsl_vector *x1 = gsl_vector_alloc(nrow);
+  
   for (int i = 0; i < ncol; i++)
   {
 # pragma omp sections
@@ -297,7 +298,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
       r1_p.push_back(pvalue[0]);
       r2_p.push_back(pvalue[1]);
       r1r2_p.push_back(pvalue[2]);
-
+      cout << "i = " << i << "; j = " << j << endl;
     }
   }
   Rcpp::DataFrame output = Rcpp::DataFrame::create(Rcpp::Named("r1") = r1,

@@ -1,4 +1,4 @@
 # combine with standard arguments for R
-PKG_CPPFLAGS = -I/usr/local/include -fopenmp -I../inst/include
+PKG_CPPFLAGS = -I/usr/local/include  -I../inst/include
 PKG_LIBS = -L/usr/local/lib -lgsl -lgslcblas -lm
 
