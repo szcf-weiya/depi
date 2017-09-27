@@ -30,14 +30,14 @@ using namespace std;
 #define COV_COL 4
 #define MAX_PAIR_CORR 0.98
 #define MAX_EPS 1e+12
-#define MIN_P_VALUE 0.001
+#define MIN_P_VALUE 0.01
 
 
 #define coef(i) (gsl_vector_get(coef, (i)))
 #define COV(i, j) (gsl_matrix_get(cov, (i), (j)))
 
 // readData when unknown nrow and ncol
-void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname, vector<string> &colname, size_t *nrow, size_t *ncol)
+void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname, vector<string> &colname, size_t *nrow, size_t *ncol, int type)
 {
   ifstream input(FILE.c_str());
   string line;
@@ -69,6 +69,15 @@ void readData(string FILE, vector<vector<double> > &mv, vector<string> &rowname,
       ss >> tmp;
       val = strtod(tmp.c_str(), NULL); // transfer str to double
       //mv[*nrow].push_back(val);
+      if (type == 0) // X
+      {
+        if (val == 2)
+          val = 1;
+        else if (val == 1)
+          val = 0.5;
+        else if (val == 0)
+          val = -1;
+      }
       mv[*nrow][j] = val;
     }
     (*nrow)++;
@@ -116,6 +125,10 @@ void readData(string FILE, gsl_matrix *m, int row, int col, vector<string> &rown
 
 Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
 {
+  FILE *output;
+  output = fopen("res_gsl.txt", "w");
+  fprintf(output, "r1\tr2\tr1*r2.p.value\n");
+  
   // convert file name
   Rcpp::CharacterVector r_inputfile_X(inputfile_X);
   Rcpp::CharacterVector r_inputfile_Y(inputfile_Y);
@@ -139,7 +152,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
   //readData(file_X.c_str(), G, MAX_ROW, MAX_COL, G_rowname, G_colname);
   vector<vector<double> > mv(1, vector<double>(1));
   size_t nrow, ncol;
-  readData(file_X.c_str(), mv, G_rowname, G_colname, &nrow, &ncol);
+  readData(file_X.c_str(), mv, G_rowname, G_colname, &nrow, &ncol, 0);
   gsl_matrix *G = gsl_matrix_calloc(nrow, ncol);
 
   for (size_t i = 0; i < nrow; i++)
@@ -156,7 +169,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
   gsl_matrix *B = gsl_matrix_alloc(COV_COL+2, COV_COL+2);
   gsl_matrix *invB = gsl_matrix_alloc(COV_COL+2, COV_COL+2);
   
-  gsl_matrix *X = gsl_matrix_alloc(nrow, p);
+  //gsl_matrix *X = gsl_matrix_alloc(nrow, p);
   if (IS_EXIST_COV)
   {
     gsl_matrix *covariate = gsl_matrix_alloc(nrow, COV_COL);
@@ -190,7 +203,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
   gsl_vector *x0 = gsl_vector_alloc(nrow);
   gsl_vector_set_all(x0, 1);
   //  gsl_vector *x1_copy = gsl_vector_alloc(MAX_ROW);
-
+  gsl_matrix_set_col(b, 0, x0);
 
   int max_val, min_val;
 
@@ -206,7 +219,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
 //  fprintf(output, "r1\tr2\tr1.p.value\tr2.p.value\tr1*r2.p.value\n");
   //# pragma omp parallel
   //# pragma omp for schedule(dynamic) // relatively slow
-  gsl_matrix_set_col(X, 0, x0);
+  //gsl_matrix_set_col(X, 0, x0);
   gsl_vector *x1 = gsl_vector_alloc(nrow);
   for (int i = 0; i < ncol; i++)
   {
@@ -218,7 +231,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
       continue;
     
     // construct x1
-    gsl_matrix_set_col(X, 1, x1);
+    gsl_matrix_set_col(b, 1, x1);
     
     // B = b'b
     gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, b, b, 0.0, B);
@@ -234,7 +247,6 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
 
       size_t flag, df;
 
-      double stderr, t;
       df = nrow - p;
 
       gsl_matrix_get_col(x2, G, j);
@@ -246,16 +258,14 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
         gsl_vector_free(x2);
         continue;
       }
-      gsl_matrix_set_col(X, 2, x2);
-
+      
       double res_corr = (float)gsl_stats_correlation(x1->data, 1, x2->data, 1, nrow);
       if (fabs(res_corr) >= MAX_PAIR_CORR)
         continue;
       gsl_vector *x3 = gsl_vector_alloc(nrow);
       gsl_matrix_get_col(x3, G, i);
       gsl_vector_mul(x3, x2);
-      gsl_vector_free(x2);
-
+      
       max_val = gsl_vector_max(x3);
       //	  min_val = gsl_vector_min(x3);
       if (max_val == 0)
@@ -370,8 +380,7 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
       zscore = gsl_vector_get(beta_1, 1)/(sqrt(rss/df*gsl_matrix_get(invXX_11, 1, 1)));
       pvalue = 2*(zscore < 0 ? (1 - gsl_cdf_tdist_P(-zscore, df)) : (1 - gsl_cdf_tdist_P(zscore, df)));
       
-      //if (pvalue > MIN_P_VALUE)
-      //		continue;
+      
       gsl_vector_free(XY_1);
       gsl_vector_free(XY_2);
       gsl_vector_free(beta_1);
@@ -390,14 +399,18 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
       gsl_matrix_free(m_tmp2);
       gsl_matrix_free(m_tmp3);
       gsl_matrix_free(m_tmp4);
-      
-      r1.push_back(G_colname[i]);
-      r2.push_back(G_colname[j]);
-      r1r2_p.push_back(pvalue);
-
+      if (pvalue > MIN_P_VALUE)
+        continue;
+      #pragma omp critical
+      {
+        r1.push_back(G_colname[i]);
+        r2.push_back(G_colname[j]);
+        r1r2_p.push_back(pvalue);
+      }
+      fprintf(output, "%d\t%d\t%.10f\n", i, j, pvalue);
     }
   }
-  Rcpp::DataFrame output = Rcpp::DataFrame::create(Rcpp::Named("r1") = r1,
+  Rcpp::DataFrame output1 = Rcpp::DataFrame::create(Rcpp::Named("r1") = r1,
                                                    Rcpp::Named("r2") = r2,
       //                                             Rcpp::Named("r1.p.value") = r1_p,
         //                                           Rcpp::Named("r2.p.value") = r2_p,
@@ -405,9 +418,8 @@ Rcpp::List DetectEpi(SEXP inputfile_X, SEXP inputfile_Y, SEXP inputfile_COV)
 
   gsl_vector_free(x0);
   gsl_vector_free(x1);
-  gsl_matrix_free(X);
   gsl_vector_free(Y);
   gsl_matrix_free(G);
-
-  return output;
+  fclose(output);
+  return output1;
 }
