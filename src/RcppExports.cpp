@@ -18,6 +18,47 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// frlr1
+Rcpp::List frlr1(SEXP R_X, SEXP R_Y, SEXP R_COV);
+RcppExport SEXP _depi_frlr1(SEXP R_XSEXP, SEXP R_YSEXP, SEXP R_COVSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type R_X(R_XSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_Y(R_YSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_COV(R_COVSEXP);
+    rcpp_result_gen = Rcpp::wrap(frlr1(R_X, R_Y, R_COV));
+    return rcpp_result_gen;
+END_RCPP
+}
+// frlr
+Rcpp::List frlr(SEXP R_X, SEXP R_Y, SEXP R_COV);
+RcppExport SEXP _depi_frlr(SEXP R_XSEXP, SEXP R_YSEXP, SEXP R_COVSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type R_X(R_XSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_Y(R_YSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_COV(R_COVSEXP);
+    rcpp_result_gen = Rcpp::wrap(frlr(R_X, R_Y, R_COV));
+    return rcpp_result_gen;
+END_RCPP
+}
+// frlr2
+Rcpp::List frlr2(SEXP R_X, SEXP R_idx1, SEXP R_idx2, SEXP R_Y, SEXP R_COV);
+RcppExport SEXP _depi_frlr2(SEXP R_XSEXP, SEXP R_idx1SEXP, SEXP R_idx2SEXP, SEXP R_YSEXP, SEXP R_COVSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type R_X(R_XSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_idx1(R_idx1SEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_idx2(R_idx2SEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_Y(R_YSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type R_COV(R_COVSEXP);
+    rcpp_result_gen = Rcpp::wrap(frlr2(R_X, R_idx1, R_idx2, R_Y, R_COV));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_hello
 List rcpp_hello();
 RcppExport SEXP _depi_rcpp_hello() {
@@ -42,6 +83,9 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_depi_DetectEpi", (DL_FUNC) &_depi_DetectEpi, 3},
+    {"_depi_frlr1", (DL_FUNC) &_depi_frlr1, 3},
+    {"_depi_frlr", (DL_FUNC) &_depi_frlr, 3},
+    {"_depi_frlr2", (DL_FUNC) &_depi_frlr2, 5},
     {"_depi_rcpp_hello", (DL_FUNC) &_depi_rcpp_hello, 0},
     {"_depi_eigenK", (DL_FUNC) &_depi_eigenK, 1},
     {NULL, NULL, 0}

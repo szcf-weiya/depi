@@ -5,6 +5,18 @@ DetectEpi <- function(inputfile_X, inputfile_Y, inputfile_COV) {
     .Call('_depi_DetectEpi', PACKAGE = 'depi', inputfile_X, inputfile_Y, inputfile_COV)
 }
 
+frlr1 <- function(R_X, R_Y, R_COV) {
+    .Call('_depi_frlr1', PACKAGE = 'depi', R_X, R_Y, R_COV)
+}
+
+frlr <- function(R_X, R_Y, R_COV) {
+    .Call('_depi_frlr', PACKAGE = 'depi', R_X, R_Y, R_COV)
+}
+
+frlr2 <- function(R_X, R_idx1, R_idx2, R_Y, R_COV) {
+    .Call('_depi_frlr2', PACKAGE = 'depi', R_X, R_idx1, R_idx2, R_Y, R_COV)
+}
+
 rcpp_hello <- function() {
     .Call('_depi_rcpp_hello', PACKAGE = 'depi')
 }
